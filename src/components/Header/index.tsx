@@ -30,6 +30,12 @@ const Header: React.FC<HeaderProps> = ({ size = 'large' }: HeaderProps) => (
         >
           Importar
         </NavLink>
+        <NavLink
+          to="/create"
+          activeStyle={{ borderBottom: '3px solid #ff872c' }}
+        >
+          Cadastrar
+        </NavLink>
       </nav>
     </header>
   </Container>

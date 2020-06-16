@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom';
 
 import filesize from 'filesize';
 
+import { toast } from 'react-toastify';
 import Header from '../../components/Header';
 import FileList from '../../components/FileList';
 import Upload from '../../components/Upload';
@@ -23,17 +24,30 @@ const Import: React.FC = () => {
   const history = useHistory();
 
   async function handleUpload(): Promise<void> {
-    const data = new FormData();
-
-    // data.append('file', )
-
-    // TODO
-
-    try {
-      // await api.post('/transactions/import', data);
-    } catch (err) {
-      console.log(err.response.error);
+    if (!uploadedFiles.length) {
+      toast.warn('Insira pelo menos um arquivo!');
+      return;
     }
+
+    uploadedFiles.forEach(async file => {
+      try {
+        const data = new FormData();
+
+        data.append('file', file.file, file.name);
+        await api.post('/transactions/import', data);
+        return;
+      } catch (err) {
+        toast.error(err.response.data.message);
+        setUploadedFiles(
+          uploadedFiles.filter(fileU => file.file.name !== fileU.file.name),
+        );
+      }
+    });
+
+    setTimeout(() => {
+      toast.success('Arquivo importado com sucesso!');
+      history.push('/');
+    }, 1500);
   }
 
   function submitFile(files: File[]): void {
@@ -53,7 +67,9 @@ const Import: React.FC = () => {
         <Title>Importar uma transação</Title>
         <ImportFileContainer>
           <Upload onUpload={submitFile} />
-          {!!uploadedFiles.length && <FileList files={uploadedFiles} />}
+          {!!uploadedFiles.length && (
+            <FileList files={uploadedFiles} onDelete={setUploadedFiles} />
+          )}
 
           <Footer>
             <p>
